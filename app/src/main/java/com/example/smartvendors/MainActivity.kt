@@ -4,44 +4,129 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.*
+import com.example.smartvendors.ui.auth.EmailVerificationScreen
+import com.example.smartvendors.ui.auth.LoginScreen
+import com.example.smartvendors.ui.auth.RegisterScreen
+import com.example.smartvendors.ui.auth.ForgotPasswordScreen
 import com.example.smartvendors.ui.theme.SmartVendorsTheme
 
+import androidx.compose.runtime.rememberCoroutineScope
+import android.widget.Toast
+import kotlinx.coroutines.launch
+import com.example.smartvendors.ui.auth.GoogleSignInManager
+import com.example.smartvendors.ui.auth.AuthViewModel
+
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
+
             SmartVendorsTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+
+                val googleSignInManager = remember {
+                    GoogleSignInManager(this@MainActivity)
+                }
+
+                val authViewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
+                val coroutineScope = rememberCoroutineScope()
+
+                var currentScreen by remember {
+                    mutableStateOf("login")
+                }
+
+                var registeredEmail by remember {
+                    mutableStateOf("")
+                }
+
+                when (currentScreen) {
+
+                    "login" -> {
+
+                        LoginScreen(
+                            viewModel = authViewModel,
+
+                            onRegisterClick = {
+                                currentScreen = "register"
+                            },
+
+                            onForgotPasswordClick = {
+                                currentScreen = "forgotPassword"
+                            },
+
+                            onGoogleClick = {
+
+                                coroutineScope.launch {
+
+                                    try {
+
+                                        val idToken =
+                                            googleSignInManager
+                                                .getGoogleIdToken()
+
+                                        authViewModel
+                                            .loginWithGoogle(idToken)
+
+                                    } catch (e: Exception) {
+
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            e.message
+                                                ?: "No se pudo iniciar sesión con Google",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                    "register" -> {
+
+                        RegisterScreen(
+                            onRegisterSuccess = { email ->
+
+                                registeredEmail = email
+                                currentScreen = "verification"
+                            },
+
+                            onBackToLogin = {
+                                currentScreen = "login"
+                            }
+                        )
+                    }
+
+                    "verification" -> {
+
+                        EmailVerificationScreen(
+                            email = registeredEmail,
+
+                            onVerificationSuccess = {
+
+                                currentScreen = "login"
+                            },
+
+                            onBackToLogin = {
+
+                                currentScreen = "login"
+                            }
+                        )
+                    }
+
+                    "forgotPassword" -> {
+
+                        ForgotPasswordScreen(
+                            onBackToLogin = {
+                                currentScreen = "login"
+                            }
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SmartVendorsTheme {
-        Greeting("Android")
     }
 }

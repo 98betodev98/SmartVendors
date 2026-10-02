@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "248344156880",
+    "project_id": "smartvendors-5b891",
+    "storage_bucket": "smartvendors-5b891.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:248344156880:android:645bb7d6f48673fa70dcd5",
+        "android_client_info": {
+          "package_name": "com.example.smartvendors"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "248344156880-igdjsc5ju7729turn3n62n5jt6t4k8bv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.smartvendors",
+            "certificate_hash": "b393ff52e77c63a0400e1b310a75ae87c2a28565"
+          }
+        },
+        {
+          "client_id": "248344156880-3alouoklphdnt9vscvtmghaul2shh8qu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwPhrznBq9BV47V7bqpd1dXplAJ9nHv4Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "248344156880-3alouoklphdnt9vscvtmghaul2shh8qu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
