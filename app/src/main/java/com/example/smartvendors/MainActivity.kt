@@ -16,6 +16,9 @@ import android.widget.Toast
 import kotlinx.coroutines.launch
 import com.example.smartvendors.ui.auth.GoogleSignInManager
 import com.example.smartvendors.ui.auth.AuthViewModel
+import com.example.smartvendors.ui.profile.ProfileScreen
+
+import androidx.activity.compose.BackHandler
 
 class MainActivity : ComponentActivity() {
 
@@ -43,6 +46,33 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf("")
                 }
 
+                BackHandler {
+
+                    when (currentScreen) {
+
+                        "profile" -> {
+                            authViewModel.clearState()
+                            currentScreen = "login"
+                        }
+
+                        "register" -> {
+                            currentScreen = "login"
+                        }
+
+                        "forgotPassword" -> {
+                            currentScreen = "login"
+                        }
+
+                        "verification" -> {
+                            currentScreen = "login"
+                        }
+
+                        else -> {
+                            // En Login dejamos que Android cierre la aplicación
+                        }
+                    }
+                }
+
                 when (currentScreen) {
 
                     "login" -> {
@@ -56,6 +86,10 @@ class MainActivity : ComponentActivity() {
 
                             onForgotPasswordClick = {
                                 currentScreen = "forgotPassword"
+                            },
+
+                            onLoginSuccess = {
+                                currentScreen = "profile"
                             },
 
                             onGoogleClick = {
@@ -121,6 +155,16 @@ class MainActivity : ComponentActivity() {
 
                         ForgotPasswordScreen(
                             onBackToLogin = {
+                                currentScreen = "login"
+                            }
+                        )
+                    }
+
+                    "profile" -> {
+
+                        ProfileScreen(
+                            onBack = {
+                                authViewModel.clearState()
                                 currentScreen = "login"
                             }
                         )
