@@ -3,9 +3,9 @@ package com.example.smartvendors.ui.profile
 import androidx.compose.foundation.layout.navigationBarsPadding
 
 
-import androidx.compose.foundation.layout.Arrangement
+
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +19,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Switch
+
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,6 +47,7 @@ import java.io.ByteArrayOutputStream
 
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
@@ -54,7 +55,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onPreferencesClick: () -> Unit
 ) {
 
     val profile by viewModel.profile.collectAsState()
@@ -66,18 +68,6 @@ fun ProfileScreen(
 
     var apellido by remember {
         mutableStateOf("")
-    }
-
-    var recibirOfertas by remember {
-        mutableStateOf(true)
-    }
-
-    var recibirCapacitaciones by remember {
-        mutableStateOf(true)
-    }
-
-    var recibirNotificaciones by remember {
-        mutableStateOf(true)
     }
 
     var selectedImageBase64 by remember {
@@ -129,11 +119,6 @@ fun ProfileScreen(
         nombre = profile.nombre
         apellido = profile.apellido
 
-        recibirOfertas = profile.recibirOfertas
-        recibirCapacitaciones =
-            profile.recibirCapacitaciones
-        recibirNotificaciones =
-            profile.recibirNotificaciones
     }
 
     LaunchedEffect(profile.fotoPerfil) {
@@ -150,6 +135,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .navigationBarsPadding()
             .verticalScroll(
                 rememberScrollState()
@@ -287,41 +273,6 @@ fun ProfileScreen(
             modifier = Modifier.height(28.dp)
         )
 
-        Text(
-            text = "Preferencias y notificaciones",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(
-            modifier = Modifier.height(12.dp)
-        )
-
-        PreferenceSwitch(
-            title = "Ofertas y promociones",
-            checked = recibirOfertas,
-            onCheckedChange = {
-                recibirOfertas = it
-            }
-        )
-
-        PreferenceSwitch(
-            title = "Capacitaciones",
-            checked = recibirCapacitaciones,
-            onCheckedChange = {
-                recibirCapacitaciones = it
-            }
-        )
-
-        PreferenceSwitch(
-            title = "Notificaciones",
-            checked = recibirNotificaciones,
-            onCheckedChange = {
-                recibirNotificaciones = it
-            }
-        )
-
         Spacer(
             modifier = Modifier.height(24.dp)
         )
@@ -368,18 +319,24 @@ fun ProfileScreen(
                 viewModel.updateProfile(
                     nombre = nombre,
                     apellido = apellido,
-                    fotoPerfil = selectedImageBase64,
-                    recibirOfertas = recibirOfertas,
-                    recibirCapacitaciones =
-                        recibirCapacitaciones,
-                    recibirNotificaciones =
-                        recibirNotificaciones
+                    fotoPerfil = selectedImageBase64
                 )
             },
             modifier = Modifier.fillMaxWidth()
         ) {
 
             Text("Guardar cambios")
+        }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        Button(
+            onClick = onPreferencesClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Preferencias")
         }
 
         Spacer(
@@ -480,31 +437,4 @@ private fun base64ToBitmap(
 } catch (e: Exception) {
 
     null
-}
-
-@Composable
-private fun PreferenceSwitch(
-    title: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-
-        Text(
-            text = title,
-            modifier = Modifier.weight(1f)
-        )
-
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange
-        )
-    }
 }

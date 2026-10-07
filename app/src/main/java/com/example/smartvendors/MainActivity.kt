@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import com.example.smartvendors.ui.auth.GoogleSignInManager
 import com.example.smartvendors.ui.auth.AuthViewModel
 import com.example.smartvendors.ui.profile.ProfileScreen
+import com.example.smartvendors.ui.preferences.PreferencesScreen
 
 import androidx.activity.compose.BackHandler
 
@@ -49,6 +50,10 @@ class MainActivity : ComponentActivity() {
                 BackHandler {
 
                     when (currentScreen) {
+
+                        "preferences" -> {
+                            currentScreen = "profile"
+                        }
 
                         "profile" -> {
                             authViewModel.clearState()
@@ -166,6 +171,17 @@ class MainActivity : ComponentActivity() {
                             onBack = {
                                 authViewModel.clearState()
                                 currentScreen = "login"
+                            },
+                            onPreferencesClick = {
+                                currentScreen = "preferences"
+                            }
+                        )
+                    }
+
+                    "preferences" -> {
+                        PreferencesScreen(
+                            onBack = {
+                                currentScreen = "profile"
                             }
                         )
                     }

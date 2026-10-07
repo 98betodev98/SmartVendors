@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import android.net.Uri
+
 
 sealed interface ProfileState {
 
@@ -92,10 +92,7 @@ class ProfileViewModel : ViewModel() {
     fun updateProfile(
         nombre: String,
         apellido: String,
-        fotoPerfil: String,
-        recibirOfertas: Boolean,
-        recibirCapacitaciones: Boolean,
-        recibirNotificaciones: Boolean
+        fotoPerfil: String
     ) {
 
         val user = auth.currentUser
@@ -110,54 +107,55 @@ class ProfileViewModel : ViewModel() {
             return
         }
 
-        val updatedProfile = UserProfile(
-
-            uid = user.uid,
-
-            email = user.email ?: "",
-
-            nombre = nombre,
-
-            apellido = apellido,
-
-            fotoPerfil = fotoPerfil,
-
-            recibirOfertas = recibirOfertas,
-
-            recibirCapacitaciones =
-                recibirCapacitaciones,
-
-            recibirNotificaciones =
-                recibirNotificaciones
-        )
-
         viewModelScope.launch {
 
             _profileState.value =
                 ProfileState.Loading
 
-            val result =
-                repository.saveProfile(
-                    updatedProfile
-                )
+            val currentProfileResult =
+                repository.getProfile(user.uid)
 
-            result
-                .onSuccess {
+            currentProfileResult
+                .onSuccess { currentProfile ->
 
-                    _profile.value =
-                        updatedProfile
-
-                    _profileState.value =
-                        ProfileState.Success(
-                            "Perfil actualizado correctamente"
+                    val updatedProfile =
+                        currentProfile.copy(
+                            nombre = nombre,
+                            apellido = apellido,
+                            fotoPerfil = fotoPerfil
                         )
+
+                    val saveResult =
+                        repository.saveProfile(
+                            updatedProfile
+                        )
+
+                    saveResult
+                        .onSuccess {
+
+                            _profile.value =
+                                updatedProfile
+
+                            _profileState.value =
+                                ProfileState.Success(
+                                    "Perfil actualizado correctamente"
+                                )
+                        }
+                        .onFailure { exception ->
+
+                            _profileState.value =
+                                ProfileState.Error(
+                                    exception.message
+                                        ?: "No se pudo actualizar el perfil"
+                                )
+                        }
                 }
                 .onFailure { exception ->
 
                     _profileState.value =
                         ProfileState.Error(
                             exception.message
-                                ?: "No se pudo actualizar el perfil"
+                                ?: "No se pudo obtener el perfil"
                         )
                 }
         }
