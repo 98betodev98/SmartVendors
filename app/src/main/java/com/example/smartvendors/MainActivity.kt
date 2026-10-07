@@ -10,6 +10,8 @@ import com.example.smartvendors.ui.auth.LoginScreen
 import com.example.smartvendors.ui.auth.RegisterScreen
 import com.example.smartvendors.ui.auth.ForgotPasswordScreen
 import com.example.smartvendors.ui.theme.SmartVendorsTheme
+import com.example.smartvendors.ui.setup.InitialSetupScreen
+import com.example.smartvendors.ui.setup.InitialSetupViewModel
 
 import androidx.compose.runtime.rememberCoroutineScope
 import android.widget.Toast
@@ -37,6 +39,8 @@ class MainActivity : ComponentActivity() {
 
                 val authViewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
+                val setupViewModel: InitialSetupViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+
                 val coroutineScope = rememberCoroutineScope()
 
                 var currentScreen by remember {
@@ -50,6 +54,10 @@ class MainActivity : ComponentActivity() {
                 BackHandler {
 
                     when (currentScreen) {
+
+                        "setup" -> {
+                            currentScreen = "profile"
+                        }
 
                         "preferences" -> {
                             currentScreen = "profile"
@@ -94,7 +102,15 @@ class MainActivity : ComponentActivity() {
                             },
 
                             onLoginSuccess = {
-                                currentScreen = "profile"
+                                setupViewModel.checkSetupCompleted { completed ->
+
+                                    currentScreen =
+                                        if (completed) {
+                                            "profile"
+                                        } else {
+                                            "setup"
+                                        }
+                                }
                             },
 
                             onGoogleClick = {
@@ -180,6 +196,24 @@ class MainActivity : ComponentActivity() {
 
                     "preferences" -> {
                         PreferencesScreen(
+                            onBack = {
+                                currentScreen = "profile"
+                            }
+                        )
+                    }
+
+                    "setup" -> {
+
+                        val setupViewModel: InitialSetupViewModel =
+                            androidx.lifecycle.viewmodel.compose.viewModel()
+
+                        InitialSetupScreen(
+                            viewModel = setupViewModel,
+
+                            onSetupComplete = {
+                                currentScreen = "profile"
+                            },
+
                             onBack = {
                                 currentScreen = "profile"
                             }

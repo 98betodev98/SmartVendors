@@ -53,7 +53,6 @@ fun PreferencesScreen(
             .fillMaxSize()
             .statusBarsPadding()
             .navigationBarsPadding()
-            .navigationBarsPadding()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
