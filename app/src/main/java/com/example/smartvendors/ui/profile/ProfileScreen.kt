@@ -52,16 +52,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import com.example.smartvendors.ui.theme.SmartVendorsBack
 
 import com.example.smartvendors.ui.theme.SmartVendorsPreferences
 import com.example.smartvendors.ui.theme.SmartVendorsCatalog
+import com.example.smartvendors.ui.theme.SmartVendorsClients
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
     onBack: () -> Unit = {},
     onPreferencesClick: () -> Unit,
-    onCatalogClick: () -> Unit
+    onCatalogClick: () -> Unit,
+    onClientsClick: () -> Unit
 ) {
 
     val profile by viewModel.profile.collectAsState()
@@ -366,8 +369,25 @@ fun ProfileScreen(
         )
 
         Button(
+            onClick = onClientsClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SmartVendorsClients
+            )
+        ) {
+            Text("Gestionar clientes")
+        }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        Button(
             onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SmartVendorsBack
+            )
         ) {
 
             Text("Volver")

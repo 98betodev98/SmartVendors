@@ -11,18 +11,24 @@ import com.example.smartvendors.ui.auth.RegisterScreen
 import com.example.smartvendors.ui.auth.ForgotPasswordScreen
 import com.example.smartvendors.ui.theme.SmartVendorsTheme
 import com.example.smartvendors.ui.setup.InitialSetupScreen
+import com.example.smartvendors.ui.profile.ProfileScreen
+import com.example.smartvendors.ui.preferences.PreferencesScreen
 import com.example.smartvendors.ui.setup.InitialSetupViewModel
 import com.example.smartvendors.ui.catalog.CatalogScreen
+import com.example.smartvendors.ui.client.ClientScreen
+import com.example.smartvendors.ui.client.AddClientScreen
+import com.example.smartvendors.ui.client.EditClientScreen
+
 
 import androidx.compose.runtime.rememberCoroutineScope
 import android.widget.Toast
 import kotlinx.coroutines.launch
 import com.example.smartvendors.ui.auth.GoogleSignInManager
 import com.example.smartvendors.ui.auth.AuthViewModel
-import com.example.smartvendors.ui.profile.ProfileScreen
-import com.example.smartvendors.ui.preferences.PreferencesScreen
+
 
 import androidx.activity.compose.BackHandler
+import com.example.smartvendors.domain.model.Client
 
 class MainActivity : ComponentActivity() {
 
@@ -50,6 +56,10 @@ class MainActivity : ComponentActivity() {
 
                 var registeredEmail by remember {
                     mutableStateOf("")
+                }
+
+                var selectedClient by remember {
+                    mutableStateOf<Client?>(null)
                 }
 
                 BackHandler {
@@ -83,6 +93,19 @@ class MainActivity : ComponentActivity() {
 
                         "catalog" -> {
                             currentScreen = "profile"
+                        }
+
+                        "clients" -> {
+                            currentScreen = "profile"
+                        }
+
+                        "addClient" -> {
+                            currentScreen = "clients"
+                        }
+
+                        "editClient" -> {
+                            selectedClient = null
+                            currentScreen = "clients"
                         }
 
                         else -> {
@@ -198,6 +221,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onCatalogClick = {
                                 currentScreen = "catalog"
+                            },
+                            onClientsClick = {
+                                currentScreen = "clients"
                             }
                         )
                     }
@@ -234,6 +260,48 @@ class MainActivity : ComponentActivity() {
                                 currentScreen = "profile"
                             }
                         )
+                    }
+
+                    "clients" -> {
+                        ClientScreen(
+                            onBack = {
+                                currentScreen = "profile"
+                            },
+                            onAddClient = {
+                                currentScreen = "addClient"
+                            },
+                            onEditClient = { client ->
+                                selectedClient = client
+                                currentScreen = "editClient"
+                            }
+                        )
+                    }
+
+                    "addClient" -> {
+                        AddClientScreen(
+                            onBack = {
+                                currentScreen = "clients"
+                            },
+                            onClientSaved = {
+                                currentScreen = "clients"
+                            }
+                        )
+                    }
+
+                    "editClient" -> {
+                        selectedClient?.let { client ->
+
+                            EditClientScreen(
+                                client = client,
+                                onBack = {
+                                    currentScreen = "clients"
+                                },
+                                onClientUpdated = {
+                                    selectedClient = null
+                                    currentScreen = "clients"
+                                }
+                            )
+                        }
                     }
                 }
             }

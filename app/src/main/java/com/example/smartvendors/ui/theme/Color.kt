@@ -19,5 +19,10 @@ val SmartVendorsText = Color(0xFF262126)
 val SmartVendorsSuccess = Color(0xFF4CAF50)
 val SmartVendorsError = Color(0xFFBA1A1A)
 
-val SmartVendorsPreferences = Color(0xFF9CC7E8)
-val SmartVendorsCatalog = Color(0xFF9DD6B8)
+val SmartVendorsPreferences = Color(0xFF6FB6E5)
+val SmartVendorsCatalog = Color(0xFF69C89A)
+val SmartVendorsClients = Color(0xFFC47BD4)
+val SmartVendorsBack = Color(0xFF9E96A5)
+
+val SmartVendorsClientEdit = Color(0xFFF1B70D)
+val SmartVendorsClientDelete = Color(0xFFD32F2F)
