@@ -45,6 +45,9 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
 
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.coil.compose)
 
     implementation(libs.firebase.auth)
     implementation(libs.androidx.activity.compose)

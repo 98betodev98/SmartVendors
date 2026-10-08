@@ -12,6 +12,7 @@ import com.example.smartvendors.ui.auth.ForgotPasswordScreen
 import com.example.smartvendors.ui.theme.SmartVendorsTheme
 import com.example.smartvendors.ui.setup.InitialSetupScreen
 import com.example.smartvendors.ui.setup.InitialSetupViewModel
+import com.example.smartvendors.ui.catalog.CatalogScreen
 
 import androidx.compose.runtime.rememberCoroutineScope
 import android.widget.Toast
@@ -78,6 +79,10 @@ class MainActivity : ComponentActivity() {
 
                         "verification" -> {
                             currentScreen = "login"
+                        }
+
+                        "catalog" -> {
+                            currentScreen = "profile"
                         }
 
                         else -> {
@@ -190,6 +195,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onPreferencesClick = {
                                 currentScreen = "preferences"
+                            },
+                            onCatalogClick = {
+                                currentScreen = "catalog"
                             }
                         )
                     }
@@ -214,6 +222,14 @@ class MainActivity : ComponentActivity() {
                                 currentScreen = "profile"
                             },
 
+                            onBack = {
+                                currentScreen = "profile"
+                            }
+                        )
+                    }
+
+                    "catalog" -> {
+                        CatalogScreen(
                             onBack = {
                                 currentScreen = "profile"
                             }

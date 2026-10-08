@@ -18,3 +18,6 @@ val SmartVendorsText = Color(0xFF262126)
 // Estados
 val SmartVendorsSuccess = Color(0xFF4CAF50)
 val SmartVendorsError = Color(0xFFBA1A1A)
+
+val SmartVendorsPreferences = Color(0xFF9CC7E8)
+val SmartVendorsCatalog = Color(0xFF9DD6B8)

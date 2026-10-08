@@ -49,14 +49,19 @@ import java.io.ByteArrayOutputStream
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+
+import com.example.smartvendors.ui.theme.SmartVendorsPreferences
+import com.example.smartvendors.ui.theme.SmartVendorsCatalog
 
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
     onBack: () -> Unit = {},
-    onPreferencesClick: () -> Unit
+    onPreferencesClick: () -> Unit,
+    onCatalogClick: () -> Unit
 ) {
 
     val profile by viewModel.profile.collectAsState()
@@ -334,9 +339,26 @@ fun ProfileScreen(
 
         Button(
             onClick = onPreferencesClick,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SmartVendorsPreferences
+            )
         ) {
             Text("Preferencias")
+        }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        Button(
+            onClick = onCatalogClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SmartVendorsCatalog
+            )
+        ) {
+            Text("Consultar catálogo")
         }
 
         Spacer(
