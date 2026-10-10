@@ -19,6 +19,8 @@ import com.example.smartvendors.ui.client.ClientScreen
 import com.example.smartvendors.ui.client.AddClientScreen
 import com.example.smartvendors.ui.client.EditClientScreen
 
+import com.example.smartvendors.ui.cart.CartViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 import androidx.compose.runtime.rememberCoroutineScope
 import android.widget.Toast
@@ -29,6 +31,7 @@ import com.example.smartvendors.ui.auth.AuthViewModel
 
 import androidx.activity.compose.BackHandler
 import com.example.smartvendors.domain.model.Client
+import com.example.smartvendors.ui.cart.CartScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -113,6 +116,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
+
+                val cartViewModel: CartViewModel = viewModel()
 
                 when (currentScreen) {
 
@@ -258,7 +263,23 @@ class MainActivity : ComponentActivity() {
                         CatalogScreen(
                             onBack = {
                                 currentScreen = "profile"
-                            }
+                            },
+                            onCartClick = {
+                                currentScreen = "cart"
+                            },
+                            cartViewModel = cartViewModel
+                        )
+                    }
+
+                    "cart" -> {
+                        CartScreen(
+                            onBack = {
+                                currentScreen = "catalog"
+                            },
+                            onConfirmOrder = {
+                                currentScreen = "catalog"
+                            },
+                            viewModel = cartViewModel
                         )
                     }
 
