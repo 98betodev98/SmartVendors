@@ -18,6 +18,7 @@ import com.example.smartvendors.ui.catalog.CatalogScreen
 import com.example.smartvendors.ui.client.ClientScreen
 import com.example.smartvendors.ui.client.AddClientScreen
 import com.example.smartvendors.ui.client.EditClientScreen
+import com.example.smartvendors.ui.recommendations.RecommendationScreen
 
 import com.example.smartvendors.ui.cart.CartViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,10 +34,22 @@ import androidx.activity.compose.BackHandler
 import com.example.smartvendors.domain.model.Client
 import com.example.smartvendors.ui.cart.CartScreen
 
+import com.google.firebase.Firebase
+import com.google.firebase.initialize
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
+
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        FirebaseAppCheck.getInstance()
+            .installAppCheckProviderFactory(
+                DebugAppCheckProviderFactory.getInstance()
+            )
+
+
         enableEdgeToEdge()
 
         setContent {
@@ -229,6 +242,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onClientsClick = {
                                 currentScreen = "clients"
+                            },
+                            onRecommendationsClick = {
+                                currentScreen = "recommendations"
                             }
                         )
                     }
@@ -323,6 +339,14 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+                    }
+
+                    "recommendations" -> {
+                        RecommendationScreen(
+                            onBack = {
+                                currentScreen = "profile"
+                            }
+                        )
                     }
                 }
             }

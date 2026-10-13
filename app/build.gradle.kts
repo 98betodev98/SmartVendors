@@ -49,6 +49,9 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.coil.compose)
 
+    implementation("com.google.firebase:firebase-ai")
+    implementation("com.google.firebase:firebase-appcheck-debug")
+
     implementation(libs.firebase.auth)
     implementation(libs.androidx.activity.compose)
 

@@ -57,6 +57,7 @@ import com.example.smartvendors.ui.theme.SmartVendorsBack
 import com.example.smartvendors.ui.theme.SmartVendorsPreferences
 import com.example.smartvendors.ui.theme.SmartVendorsCatalog
 import com.example.smartvendors.ui.theme.SmartVendorsClients
+import com.example.smartvendors.ui.theme.SmartVendorsRecommendations
 
 @Composable
 fun ProfileScreen(
@@ -64,7 +65,8 @@ fun ProfileScreen(
     onBack: () -> Unit = {},
     onPreferencesClick: () -> Unit,
     onCatalogClick: () -> Unit,
-    onClientsClick: () -> Unit
+    onClientsClick: () -> Unit,
+    onRecommendationsClick: () -> Unit
 ) {
 
     val profile by viewModel.profile.collectAsState()
@@ -376,6 +378,20 @@ fun ProfileScreen(
             )
         ) {
             Text("Gestionar clientes")
+        }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        Button(
+            onClick = onRecommendationsClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SmartVendorsRecommendations
+            )
+        ) {
+            Text("Recomendaciones inteligentes")
         }
 
         Spacer(
