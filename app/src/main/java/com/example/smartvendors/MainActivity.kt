@@ -41,6 +41,8 @@ import com.google.firebase.Firebase
 import com.google.firebase.initialize
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.tasks.await
 
 
 class MainActivity : ComponentActivity() {
@@ -74,6 +76,33 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf("login")
                 }
 
+                LaunchedEffect(Unit) {
+                    val auth = FirebaseAuth.getInstance()
+                    val user = auth.currentUser
+
+                    if (user != null) {
+                        try {
+                            user.reload().await()
+
+                            if (user.isEmailVerified) {
+                                setupViewModel.checkSetupCompleted { completed ->
+                                    currentScreen = if (completed) {
+                                        "profile"
+                                    } else {
+                                        "setup"
+                                    }
+                                }
+                            } else {
+                                auth.signOut()
+                                currentScreen = "login"
+                            }
+                        } catch (e: Exception) {
+                            currentScreen = "login"
+                        }
+                    }
+                }
+
+
                 var registeredEmail by remember {
                     mutableStateOf("")
                 }
@@ -95,6 +124,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                         "profile" -> {
+                            FirebaseAuth.getInstance().signOut()
                             authViewModel.clearState()
                             currentScreen = "login"
                         }
@@ -243,6 +273,7 @@ class MainActivity : ComponentActivity() {
 
                         ProfileScreen(
                             onBack = {
+                                FirebaseAuth.getInstance().signOut()
                                 authViewModel.clearState()
                                 currentScreen = "login"
                             },

@@ -282,11 +282,7 @@ fun ProfileScreen(
         )
 
         Spacer(
-            modifier = Modifier.height(28.dp)
-        )
-
-        Spacer(
-            modifier = Modifier.height(24.dp)
+            modifier = Modifier.height(12.dp)
         )
 
         val currentState = profileState
@@ -341,7 +337,7 @@ fun ProfileScreen(
         }
 
         Spacer(
-            modifier = Modifier.height(12.dp)
+            modifier = Modifier.height(36.dp)
         )
 
         Button(
@@ -427,12 +423,12 @@ fun ProfileScreen(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = SmartVendorsBack
+                containerColor = MaterialTheme.colorScheme.error
             )
         ) {
-
-            Text("Volver")
+            Text("Cerrar sesión")
         }
+
     }
 }
 

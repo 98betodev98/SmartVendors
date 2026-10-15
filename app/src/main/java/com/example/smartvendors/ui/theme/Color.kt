@@ -2,11 +2,6 @@ package com.example.smartvendors.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// ==========================================
-// PALETA DE COLORES - SMARTVENDORS
-// Plataforma móvil para ventas por catálogo
-// ==========================================
-
 val SmartVendorsPrimary = Color(0xFF7B3F8C)
 
 val SmartVendorsSecondary = Color(0xFFE8B7D4)
