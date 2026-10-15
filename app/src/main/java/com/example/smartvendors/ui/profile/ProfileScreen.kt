@@ -66,7 +66,8 @@ fun ProfileScreen(
     onPreferencesClick: () -> Unit,
     onCatalogClick: () -> Unit,
     onClientsClick: () -> Unit,
-    onRecommendationsClick: () -> Unit
+    onRecommendationsClick: () -> Unit,
+    onAssistantClick: () -> Unit
 ) {
 
     val profile by viewModel.profile.collectAsState()
@@ -392,6 +393,20 @@ fun ProfileScreen(
             )
         ) {
             Text("Recomendaciones inteligentes")
+        }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        Button(
+            onClick = onAssistantClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text("Asistente virtual de ventas")
         }
 
         Spacer(

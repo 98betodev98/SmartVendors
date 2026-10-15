@@ -29,6 +29,8 @@ import kotlinx.coroutines.launch
 import com.example.smartvendors.ui.auth.GoogleSignInManager
 import com.example.smartvendors.ui.auth.AuthViewModel
 
+import com.example.smartvendors.ui.assistant.AssistantScreen
+
 
 import androidx.activity.compose.BackHandler
 import com.example.smartvendors.domain.model.Client
@@ -122,6 +124,10 @@ class MainActivity : ComponentActivity() {
                         "editClient" -> {
                             selectedClient = null
                             currentScreen = "clients"
+                        }
+
+                        "assistant" -> {
+                            currentScreen = "profile"
                         }
 
                         else -> {
@@ -245,6 +251,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onRecommendationsClick = {
                                 currentScreen = "recommendations"
+                            },
+                            onAssistantClick = {
+                                currentScreen = "assistant"
                             }
                         )
                     }
@@ -343,6 +352,14 @@ class MainActivity : ComponentActivity() {
 
                     "recommendations" -> {
                         RecommendationScreen(
+                            onBack = {
+                                currentScreen = "profile"
+                            }
+                        )
+                    }
+
+                    "assistant" -> {
+                        AssistantScreen(
                             onBack = {
                                 currentScreen = "profile"
                             }
