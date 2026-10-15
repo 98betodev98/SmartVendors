@@ -67,7 +67,8 @@ fun ProfileScreen(
     onCatalogClick: () -> Unit,
     onClientsClick: () -> Unit,
     onRecommendationsClick: () -> Unit,
-    onAssistantClick: () -> Unit
+    onAssistantClick: () -> Unit,
+    onStatisticsClick: () -> Unit
 ) {
 
     val profile by viewModel.profile.collectAsState()
@@ -407,6 +408,15 @@ fun ProfileScreen(
             )
         ) {
             Text("Asistente virtual de ventas")
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        Button(
+            onClick = onStatisticsClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Estadísticas de ventas")
         }
 
         Spacer(

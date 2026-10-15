@@ -35,11 +35,13 @@ import com.example.smartvendors.ui.assistant.AssistantScreen
 import androidx.activity.compose.BackHandler
 import com.example.smartvendors.domain.model.Client
 import com.example.smartvendors.ui.cart.CartScreen
+import com.example.smartvendors.ui.statistics.SalesStatisticsScreen
 
 import com.google.firebase.Firebase
 import com.google.firebase.initialize
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
+
 
 class MainActivity : ComponentActivity() {
 
@@ -127,6 +129,10 @@ class MainActivity : ComponentActivity() {
                         }
 
                         "assistant" -> {
+                            currentScreen = "profile"
+                        }
+
+                        "statistics" -> {
                             currentScreen = "profile"
                         }
 
@@ -254,6 +260,9 @@ class MainActivity : ComponentActivity() {
                             },
                             onAssistantClick = {
                                 currentScreen = "assistant"
+                            },
+                            onStatisticsClick = {
+                                currentScreen = "statistics"
                             }
                         )
                     }
@@ -360,6 +369,14 @@ class MainActivity : ComponentActivity() {
 
                     "assistant" -> {
                         AssistantScreen(
+                            onBack = {
+                                currentScreen = "profile"
+                            }
+                        )
+                    }
+
+                    "statistics" -> {
+                        SalesStatisticsScreen(
                             onBack = {
                                 currentScreen = "profile"
                             }
