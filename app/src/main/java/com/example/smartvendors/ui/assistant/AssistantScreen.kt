@@ -65,7 +65,7 @@ fun AssistantScreen(
     val textToSpeech = remember {
         TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                // La inicialización se completa en Android.
+
             }
         }
     }

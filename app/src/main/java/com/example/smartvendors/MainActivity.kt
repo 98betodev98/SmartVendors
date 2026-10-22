@@ -1,5 +1,18 @@
 package com.example.smartvendors
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,6 +32,7 @@ import com.example.smartvendors.ui.client.ClientScreen
 import com.example.smartvendors.ui.client.AddClientScreen
 import com.example.smartvendors.ui.client.EditClientScreen
 import com.example.smartvendors.ui.recommendations.RecommendationScreen
+import com.example.smartvendors.ui.menu.MenuScreen
 
 import com.example.smartvendors.ui.cart.CartViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -76,28 +90,40 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf("login")
                 }
 
+                var isCheckingSession by remember {
+                    mutableStateOf(true)
+                }
+
                 LaunchedEffect(Unit) {
                     val auth = FirebaseAuth.getInstance()
                     val user = auth.currentUser
 
-                    if (user != null) {
+                    if (user == null) {
+                        currentScreen = "login"
+                        isCheckingSession = false
+                    } else {
                         try {
                             user.reload().await()
 
-                            if (user.isEmailVerified) {
+                            if (auth.currentUser?.isEmailVerified == true) {
                                 setupViewModel.checkSetupCompleted { completed ->
                                     currentScreen = if (completed) {
-                                        "profile"
+                                        "menu"
                                     } else {
                                         "setup"
                                     }
+
+                                    isCheckingSession = false
                                 }
                             } else {
                                 auth.signOut()
+                                authViewModel.clearState()
                                 currentScreen = "login"
+                                isCheckingSession = false
                             }
                         } catch (e: Exception) {
                             currentScreen = "login"
+                            isCheckingSession = false
                         }
                     }
                 }
@@ -116,7 +142,13 @@ class MainActivity : ComponentActivity() {
                     when (currentScreen) {
 
                         "setup" -> {
-                            currentScreen = "profile"
+                            currentScreen = "menu"
+                        }
+
+                        "menu" -> {
+                            FirebaseAuth.getInstance().signOut()
+                            authViewModel.clearState()
+                            currentScreen = "login"
                         }
 
                         "preferences" -> {
@@ -124,10 +156,9 @@ class MainActivity : ComponentActivity() {
                         }
 
                         "profile" -> {
-                            FirebaseAuth.getInstance().signOut()
-                            authViewModel.clearState()
-                            currentScreen = "login"
+                            currentScreen = "menu"
                         }
+
 
                         "register" -> {
                             currentScreen = "login"
@@ -142,11 +173,19 @@ class MainActivity : ComponentActivity() {
                         }
 
                         "catalog" -> {
-                            currentScreen = "profile"
+                            currentScreen = "menu"
                         }
 
                         "clients" -> {
-                            currentScreen = "profile"
+                            currentScreen = "menu"
+                        }
+
+                        "assistant" -> {
+                            currentScreen = "menu"
+                        }
+
+                        "statistics" -> {
+                            currentScreen = "menu"
                         }
 
                         "addClient" -> {
@@ -158,14 +197,6 @@ class MainActivity : ComponentActivity() {
                             currentScreen = "clients"
                         }
 
-                        "assistant" -> {
-                            currentScreen = "profile"
-                        }
-
-                        "statistics" -> {
-                            currentScreen = "profile"
-                        }
-
                         else -> {
                             // En Login dejamos que Android cierre la aplicación
                         }
@@ -174,246 +205,296 @@ class MainActivity : ComponentActivity() {
 
                 val cartViewModel: CartViewModel = viewModel()
 
-                when (currentScreen) {
+                if (isCheckingSession) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color(0x99000000)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(20.dp),
+                            color = Color.White,
+                            shadowElevation = 8.dp
+                        ) {
+                            androidx.compose.foundation.layout.Column(
+                                modifier = Modifier.padding(
+                                    horizontal = 32.dp,
+                                    vertical = 28.dp
+                                ),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                CircularProgressIndicator(
+                                    color = Color(0xFF80418C)
+                                )
 
-                    "login" -> {
+                                Text(
+                                    text = "SmartVendors",
+                                    modifier = Modifier.padding(top = 20.dp),
+                                    color = Color(0xFF80418C),
+                                    style = androidx.compose.material3.MaterialTheme
+                                        .typography.titleLarge
+                                )
 
-                        LoginScreen(
-                            viewModel = authViewModel,
+                                Text(
+                                    text = "Verificando sesión...",
+                                    modifier = Modifier.padding(top = 8.dp),
+                                    color = Color.DarkGray
+                                )
+                            }
+                        }
+                    }
+                } else
+                {
+                    when (currentScreen) {
 
-                            onRegisterClick = {
-                                currentScreen = "register"
-                            },
+                        "login" -> {
 
-                            onForgotPasswordClick = {
-                                currentScreen = "forgotPassword"
-                            },
+                            LoginScreen(
+                                viewModel = authViewModel,
 
-                            onLoginSuccess = {
-                                setupViewModel.checkSetupCompleted { completed ->
+                                onRegisterClick = {
+                                    currentScreen = "register"
+                                },
 
-                                    currentScreen =
-                                        if (completed) {
-                                            "profile"
-                                        } else {
-                                            "setup"
+                                onForgotPasswordClick = {
+                                    currentScreen = "forgotPassword"
+                                },
+
+                                onLoginSuccess = {
+                                    setupViewModel.checkSetupCompleted { completed ->
+
+                                        currentScreen =
+                                            if (completed) {
+                                                "menu"
+                                            } else {
+                                                "setup"
+                                            }
+                                    }
+                                },
+
+                                onGoogleClick = {
+
+                                    coroutineScope.launch {
+
+                                        try {
+
+                                            val idToken =
+                                                googleSignInManager
+                                                    .getGoogleIdToken()
+
+                                            authViewModel
+                                                .loginWithGoogle(idToken)
+
+                                        } catch (e: Exception) {
+
+                                            Toast.makeText(
+                                                this@MainActivity,
+                                                e.message
+                                                    ?: "No se pudo iniciar sesión con Google",
+                                                Toast.LENGTH_LONG
+                                            ).show()
                                         }
-                                }
-                            },
-
-                            onGoogleClick = {
-
-                                coroutineScope.launch {
-
-                                    try {
-
-                                        val idToken =
-                                            googleSignInManager
-                                                .getGoogleIdToken()
-
-                                        authViewModel
-                                            .loginWithGoogle(idToken)
-
-                                    } catch (e: Exception) {
-
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            e.message
-                                                ?: "No se pudo iniciar sesión con Google",
-                                            Toast.LENGTH_LONG
-                                        ).show()
                                     }
                                 }
-                            }
-                        )
-                    }
+                            )
+                        }
 
-                    "register" -> {
+                        "register" -> {
 
-                        RegisterScreen(
-                            onRegisterSuccess = { email ->
+                            RegisterScreen(
+                                onRegisterSuccess = { email ->
 
-                                registeredEmail = email
-                                currentScreen = "verification"
-                            },
+                                    registeredEmail = email
+                                    currentScreen = "verification"
+                                },
 
-                            onBackToLogin = {
-                                currentScreen = "login"
-                            }
-                        )
-                    }
+                                onBackToLogin = {
+                                    currentScreen = "login"
+                                }
+                            )
+                        }
 
-                    "verification" -> {
+                        "verification" -> {
 
-                        EmailVerificationScreen(
-                            email = registeredEmail,
+                            EmailVerificationScreen(
+                                email = registeredEmail,
 
-                            onVerificationSuccess = {
+                                onVerificationSuccess = {
 
-                                currentScreen = "login"
-                            },
+                                    currentScreen = "login"
+                                },
 
-                            onBackToLogin = {
+                                onBackToLogin = {
 
-                                currentScreen = "login"
-                            }
-                        )
-                    }
+                                    currentScreen = "login"
+                                }
+                            )
+                        }
 
-                    "forgotPassword" -> {
+                        "forgotPassword" -> {
 
-                        ForgotPasswordScreen(
-                            onBackToLogin = {
-                                currentScreen = "login"
-                            }
-                        )
-                    }
+                            ForgotPasswordScreen(
+                                onBackToLogin = {
+                                    currentScreen = "login"
+                                }
+                            )
+                        }
 
-                    "profile" -> {
+                        "menu" -> {
+                            MenuScreen(
+                                onProfileClick = {
+                                    currentScreen = "profile"
+                                },
+                                onCatalogClick = {
+                                    currentScreen = "catalog"
+                                },
+                                onClientsClick = {
+                                    currentScreen = "clients"
+                                },
+                                onRecommendationsClick = {
+                                    currentScreen = "recommendations"
+                                },
+                                onAssistantClick = {
+                                    currentScreen = "assistant"
+                                },
+                                onStatisticsClick = {
+                                    currentScreen = "statistics"
+                                },
+                                onLogoutClick = {
+                                    FirebaseAuth.getInstance().signOut()
+                                    authViewModel.clearState()
+                                    currentScreen = "login"
+                                }
+                            )
+                        }
 
-                        ProfileScreen(
-                            onBack = {
-                                FirebaseAuth.getInstance().signOut()
-                                authViewModel.clearState()
-                                currentScreen = "login"
-                            },
-                            onPreferencesClick = {
-                                currentScreen = "preferences"
-                            },
-                            onCatalogClick = {
-                                currentScreen = "catalog"
-                            },
-                            onClientsClick = {
-                                currentScreen = "clients"
-                            },
-                            onRecommendationsClick = {
-                                currentScreen = "recommendations"
-                            },
-                            onAssistantClick = {
-                                currentScreen = "assistant"
-                            },
-                            onStatisticsClick = {
-                                currentScreen = "statistics"
-                            }
-                        )
-                    }
+                        "profile" -> {
+                            ProfileScreen(
+                                onBack = {
+                                    currentScreen = "menu"
+                                },
+                                onPreferencesClick = {
+                                    currentScreen = "preferences"
+                                }
+                            )
+                        }
 
-                    "preferences" -> {
-                        PreferencesScreen(
-                            onBack = {
-                                currentScreen = "profile"
-                            }
-                        )
-                    }
+                        "preferences" -> {
+                            PreferencesScreen(
+                                onBack = {
+                                    currentScreen = "profile"
+                                }
+                            )
+                        }
 
-                    "setup" -> {
+                        "setup" -> {
+                            InitialSetupScreen(
+                                viewModel = setupViewModel,
+                                onSetupComplete = {
+                                    currentScreen = "menu"
+                                },
+                                onBack = {
+                                    currentScreen = "menu"
+                                }
+                            )
+                        }
 
-                        val setupViewModel: InitialSetupViewModel =
-                            androidx.lifecycle.viewmodel.compose.viewModel()
+                        "catalog" -> {
+                            CatalogScreen(
+                                onBack = {
+                                    currentScreen = "menu"
+                                },
+                                onCartClick = {
+                                    currentScreen = "cart"
+                                },
+                                cartViewModel = cartViewModel
+                            )
+                        }
 
-                        InitialSetupScreen(
-                            viewModel = setupViewModel,
+                        "cart" -> {
+                            CartScreen(
+                                onBack = {
+                                    currentScreen = "catalog"
+                                },
+                                onConfirmOrder = {
+                                    currentScreen = "catalog"
+                                },
+                                viewModel = cartViewModel
+                            )
+                        }
 
-                            onSetupComplete = {
-                                currentScreen = "profile"
-                            },
+                        "clients" -> {
+                            ClientScreen(
+                                onBack = {
+                                    currentScreen = "menu"
+                                },
+                                onAddClient = {
+                                    currentScreen = "addClient"
+                                },
+                                onEditClient = { client ->
+                                    selectedClient = client
+                                    currentScreen = "editClient"
+                                }
+                            )
+                        }
 
-                            onBack = {
-                                currentScreen = "profile"
-                            }
-                        )
-                    }
-
-                    "catalog" -> {
-                        CatalogScreen(
-                            onBack = {
-                                currentScreen = "profile"
-                            },
-                            onCartClick = {
-                                currentScreen = "cart"
-                            },
-                            cartViewModel = cartViewModel
-                        )
-                    }
-
-                    "cart" -> {
-                        CartScreen(
-                            onBack = {
-                                currentScreen = "catalog"
-                            },
-                            onConfirmOrder = {
-                                currentScreen = "catalog"
-                            },
-                            viewModel = cartViewModel
-                        )
-                    }
-
-                    "clients" -> {
-                        ClientScreen(
-                            onBack = {
-                                currentScreen = "profile"
-                            },
-                            onAddClient = {
-                                currentScreen = "addClient"
-                            },
-                            onEditClient = { client ->
-                                selectedClient = client
-                                currentScreen = "editClient"
-                            }
-                        )
-                    }
-
-                    "addClient" -> {
-                        AddClientScreen(
-                            onBack = {
-                                currentScreen = "clients"
-                            },
-                            onClientSaved = {
-                                currentScreen = "clients"
-                            }
-                        )
-                    }
-
-                    "editClient" -> {
-                        selectedClient?.let { client ->
-
-                            EditClientScreen(
-                                client = client,
+                        "addClient" -> {
+                            AddClientScreen(
                                 onBack = {
                                     currentScreen = "clients"
                                 },
-                                onClientUpdated = {
-                                    selectedClient = null
+                                onClientSaved = {
                                     currentScreen = "clients"
                                 }
                             )
                         }
-                    }
 
-                    "recommendations" -> {
-                        RecommendationScreen(
-                            onBack = {
-                                currentScreen = "profile"
-                            }
-                        )
-                    }
+                        "editClient" -> {
+                            selectedClient?.let { client ->
 
-                    "assistant" -> {
-                        AssistantScreen(
-                            onBack = {
-                                currentScreen = "profile"
+                                EditClientScreen(
+                                    client = client,
+                                    onBack = {
+                                        currentScreen = "clients"
+                                    },
+                                    onClientUpdated = {
+                                        selectedClient = null
+                                        currentScreen = "clients"
+                                    }
+                                )
                             }
-                        )
-                    }
+                        }
 
-                    "statistics" -> {
-                        SalesStatisticsScreen(
-                            onBack = {
-                                currentScreen = "profile"
-                            }
-                        )
+                        "recommendations" -> {
+                            RecommendationScreen(
+                                onBack = {
+                                    currentScreen = "menu"
+                                }
+                            )
+                        }
+
+                        "assistant" -> {
+                            AssistantScreen(
+                                onBack = {
+                                    currentScreen = "menu"
+                                }
+                            )
+                        }
+
+                        "statistics" -> {
+                            SalesStatisticsScreen(
+                                onBack = {
+                                    currentScreen = "menu"
+                                }
+                            )
+                        }
                     }
                 }
+
+
+
+
             }
         }
     }
