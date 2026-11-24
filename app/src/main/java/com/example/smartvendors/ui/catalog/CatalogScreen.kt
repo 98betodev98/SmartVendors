@@ -57,6 +57,15 @@ import kotlinx.coroutines.launch
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
+import coil.disk.DiskCache
+
+import coil.request.ImageRequest
+import coil.request.CachePolicy
+
+import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogScreen(
@@ -83,6 +92,19 @@ fun CatalogScreen(
         SnackbarHostState()
     }
     val scope = rememberCoroutineScope()
+
+    val context = LocalContext.current
+
+    val imageLoader = remember {
+        ImageLoader.Builder(context)
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(context.cacheDir.resolve("product_image_cache"))
+                    .maxSizePercent(0.02)
+                    .build()
+            }
+            .build()
+    }
 
     val cartItems by cartViewModel.cartItems.collectAsStateWithLifecycle()
 
@@ -268,7 +290,9 @@ fun CatalogScreen(
                         ) {
 
                             items(products) { product ->
-                                ProductCard(product,
+                                ProductCard(
+                                    product = product,
+                                    imageLoader = imageLoader,
                                     onAddToCart = {
                                         cartViewModel.addProduct(
                                             CartItem(
@@ -311,7 +335,25 @@ fun CatalogScreen(
 }
 
 @Composable
-private fun ProductCard(product: Product,  onAddToCart: () -> Unit) {
+private fun ProductCard(
+    product: Product,
+    imageLoader: ImageLoader,
+    onAddToCart: () -> Unit
+) {
+    val context = LocalContext.current
+
+    val localImage = File(
+        context.filesDir,
+        "product_images/${product.id}.img"
+    )
+
+    val imageModel = if (
+        localImage.exists() && localImage.length() > 0
+    ) {
+        localImage
+    } else {
+        product.thumbnail
+    }
 
     Card(
         modifier = Modifier.fillMaxWidth()
@@ -321,8 +363,10 @@ private fun ProductCard(product: Product,  onAddToCart: () -> Unit) {
             modifier = Modifier.padding(16.dp)
         ) {
 
+
             AsyncImage(
-                model = product.thumbnail,
+                model = imageModel,
+                imageLoader = imageLoader,
                 contentDescription = product.title,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -330,6 +374,7 @@ private fun ProductCard(product: Product,  onAddToCart: () -> Unit) {
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Fit
             )
+
 
             Text(
                 text = product.title,

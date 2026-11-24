@@ -58,6 +58,14 @@ import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.tasks.await
 
+import com.example.smartvendors.ui.admin.AdminConsultantScreen
+import com.example.smartvendors.domain.model.AdminConsultant
+import com.example.smartvendors.ui.admin.AdminConsultantDetailScreen
+
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+
+import com.example.smartvendors.ui.profile.PerformanceScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -82,12 +90,18 @@ class MainActivity : ComponentActivity() {
 
                 val authViewModel: AuthViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
+                val userRole by authViewModel.userRole.collectAsState()
+
                 val setupViewModel: InitialSetupViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 
                 val coroutineScope = rememberCoroutineScope()
 
                 var currentScreen by remember {
                     mutableStateOf("login")
+                }
+
+                var selectedConsultant by remember {
+                    mutableStateOf<AdminConsultant?>(null)
                 }
 
                 var isCheckingSession by remember {
@@ -106,7 +120,13 @@ class MainActivity : ComponentActivity() {
                             user.reload().await()
 
                             if (auth.currentUser?.isEmailVerified == true) {
+
+                                // Cargar el rol del usuario autenticado
+                                authViewModel.loadCurrentUserRole()
+
+                                // Verificar la configuración inicial
                                 setupViewModel.checkSetupCompleted { completed ->
+
                                     currentScreen = if (completed) {
                                         "menu"
                                     } else {
@@ -115,12 +135,14 @@ class MainActivity : ComponentActivity() {
 
                                     isCheckingSession = false
                                 }
+
                             } else {
                                 auth.signOut()
                                 authViewModel.clearState()
                                 currentScreen = "login"
                                 isCheckingSession = false
                             }
+
                         } catch (e: Exception) {
                             currentScreen = "login"
                             isCheckingSession = false
@@ -141,6 +163,10 @@ class MainActivity : ComponentActivity() {
 
                     when (currentScreen) {
 
+                        "adminConsultants" -> currentScreen = "menu"
+
+                        "adminConsultantDetail" -> currentScreen = "adminConsultants"
+
                         "setup" -> {
                             currentScreen = "menu"
                         }
@@ -152,6 +178,10 @@ class MainActivity : ComponentActivity() {
                         }
 
                         "preferences" -> {
+                            currentScreen = "profile"
+                        }
+
+                        "performance" -> {
                             currentScreen = "profile"
                         }
 
@@ -247,6 +277,27 @@ class MainActivity : ComponentActivity() {
                 } else
                 {
                     when (currentScreen) {
+
+                        "adminConsultants" -> {
+                            AdminConsultantScreen(
+                                onBack = { currentScreen = "menu" },
+                                onConsultantClick = { consultant ->
+                                    selectedConsultant = consultant
+                                    currentScreen = "adminConsultantDetail"
+                                }
+                            )
+                        }
+
+                        "adminConsultantDetail" -> {
+                            selectedConsultant?.let { consultant ->
+                                AdminConsultantDetailScreen(
+                                    consultant = consultant,
+                                    onBack = {
+                                        currentScreen = "adminConsultants"
+                                    }
+                                )
+                            }
+                        }
 
                         "login" -> {
 
@@ -365,17 +416,26 @@ class MainActivity : ComponentActivity() {
                                     FirebaseAuth.getInstance().signOut()
                                     authViewModel.clearState()
                                     currentScreen = "login"
+                                },
+                                userRole = userRole ?: "USER",
+                                onAdminConsultantsClick = {
+                                    currentScreen = "adminConsultants"
                                 }
                             )
                         }
 
                         "profile" -> {
                             ProfileScreen(
+                                onBack = { currentScreen = "menu" },
+                                onPreferencesClick = { currentScreen = "preferences" },
+                                onPerformanceClick = { currentScreen = "performance" }
+                            )
+                        }
+
+                        "performance" -> {
+                            PerformanceScreen(
                                 onBack = {
-                                    currentScreen = "menu"
-                                },
-                                onPreferencesClick = {
-                                    currentScreen = "preferences"
+                                    currentScreen = "profile"
                                 }
                             )
                         }

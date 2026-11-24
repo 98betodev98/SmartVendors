@@ -2,13 +2,12 @@ package com.example.smartvendors.data.repository
 
 import com.example.smartvendors.domain.model.UserProfile
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.tasks.await
-
 
 class ProfileRepository {
 
     private val firestore = FirebaseFirestore.getInstance()
-
 
     private val usersCollection = firestore
         .collection("users")
@@ -37,16 +36,12 @@ class ProfileRepository {
                 }
 
             } else {
-
                 Result.success(
-                    UserProfile(
-                        uid = uid
-                    )
+                    UserProfile(uid = uid)
                 )
             }
 
         } catch (e: Exception) {
-
             Result.failure(e)
         }
     }
@@ -59,7 +54,7 @@ class ProfileRepository {
 
             usersCollection
                 .document(profile.uid)
-                .set(profile)
+                .set(profile, SetOptions.merge())
                 .await()
 
             Result.success(Unit)
@@ -69,8 +64,4 @@ class ProfileRepository {
             Result.failure(e)
         }
     }
-
-
-
-
 }

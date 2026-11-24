@@ -1,7 +1,6 @@
 
 package com.example.smartvendors.ui.recommendations
 
-import androidx.lifecycle.ViewModel
 import com.example.smartvendors.data.repository.ProductRepository
 import com.example.smartvendors.data.repository.RecommendationRepository
 import com.example.smartvendors.domain.model.ProductRecommendation
@@ -12,10 +11,14 @@ import kotlinx.coroutines.launch
 import com.example.smartvendors.data.remote.GeminiRecommendationService
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.TimeoutCancellationException
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 
-class RecommendationViewModel : ViewModel() {
+class RecommendationViewModel (
+    application: Application
+) : AndroidViewModel(application) {
 
-    private val productRepository = ProductRepository()
+    private val productRepository = ProductRepository(application)
     private val recommendationRepository = RecommendationRepository()
 
     private val geminiService = GeminiRecommendationService()

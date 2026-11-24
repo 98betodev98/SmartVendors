@@ -1,7 +1,6 @@
 
 package com.example.smartvendors.ui.assistant
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.smartvendors.data.remote.GeminiAssistantService
 import com.example.smartvendors.data.repository.ProductRepository
@@ -11,9 +10,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 
-class AssistantViewModel : ViewModel() {
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 
-    private val productRepository = ProductRepository()
+class AssistantViewModel(
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val productRepository = ProductRepository(application)
     private val geminiService = GeminiAssistantService()
 
     private val _messages: MutableStateFlow<List<ChatMessage>> =

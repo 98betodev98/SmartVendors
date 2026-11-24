@@ -56,7 +56,8 @@ import java.io.ByteArrayOutputStream
 fun ProfileScreen(
     viewModel: ProfileViewModel = viewModel(),
     onBack: () -> Unit,
-    onPreferencesClick: () -> Unit
+    onPreferencesClick: () -> Unit,
+    onPerformanceClick: () -> Unit
 ) {
     val profile by viewModel.profile.collectAsState()
     val profileState by viewModel.profileState.collectAsState()
@@ -310,6 +311,18 @@ fun ProfileScreen(
             )
         ) {
             Text("Preferencias")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = onPerformanceClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = SmartVendorsPreferences
+            )
+        ) {
+            Text("Mi rendimiento")
         }
 
         Spacer(modifier = Modifier.height(16.dp))

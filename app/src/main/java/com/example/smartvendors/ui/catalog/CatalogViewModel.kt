@@ -1,6 +1,8 @@
+
 package com.example.smartvendors.ui.catalog
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.smartvendors.data.repository.ProductRepository
 import com.example.smartvendors.domain.model.Product
@@ -8,9 +10,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class CatalogViewModel : ViewModel() {
+class CatalogViewModel(
+    application: Application
+) : AndroidViewModel(application) {
 
-    private val repository = ProductRepository()
+    private val repository = ProductRepository(application)
 
     private val _allProducts = MutableStateFlow<List<Product>>(emptyList())
 
@@ -41,7 +45,7 @@ class CatalogViewModel : ViewModel() {
             result
                 .onSuccess { productList ->
                     _allProducts.value = productList
-                    _products.value = productList
+                    applyFilters()
                 }
                 .onFailure { exception ->
                     _errorMessage.value =
@@ -55,14 +59,12 @@ class CatalogViewModel : ViewModel() {
     fun searchProducts(query: String) {
 
         _searchQuery.value = query
-
         applyFilters()
     }
 
     fun filterByCategory(category: String) {
 
         _selectedCategory.value = category
-
         applyFilters()
     }
 
@@ -75,21 +77,12 @@ class CatalogViewModel : ViewModel() {
 
             val matchesSearch =
                 query.isBlank() ||
-                        product.title.contains(
-                            query,
-                            ignoreCase = true
-                        ) ||
-                        product.category.contains(
-                            query,
-                            ignoreCase = true
-                        )
+                        product.title.contains(query, ignoreCase = true) ||
+                        product.category.contains(query, ignoreCase = true)
 
             val matchesCategory =
                 category == "Todas" ||
-                        product.category.equals(
-                            category,
-                            ignoreCase = true
-                        )
+                        product.category.equals(category, ignoreCase = true)
 
             matchesSearch && matchesCategory
         }

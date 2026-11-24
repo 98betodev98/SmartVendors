@@ -16,13 +16,15 @@ class AuthViewModel : ViewModel() {
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
+    // Rol del usuario autenticado
+    private val _userRole = MutableStateFlow<String?>(null)
+    val userRole: StateFlow<String?> = _userRole.asStateFlow()
 
     fun register(
         email: String,
         password: String
     ) {
         viewModelScope.launch {
-
             _authState.value = AuthState.Loading
 
             val result = repository.register(
@@ -32,9 +34,7 @@ class AuthViewModel : ViewModel() {
 
             result
                 .onSuccess {
-
-                    val verificationResult =
-                        sendEmailVerificationInternal()
+                    val verificationResult = sendEmailVerificationInternal()
 
                     verificationResult
                         .onSuccess {
@@ -59,29 +59,23 @@ class AuthViewModel : ViewModel() {
 
     fun checkEmailVerification() {
         viewModelScope.launch {
-
             _authState.value = AuthState.Loading
 
             val result = repository.checkEmailVerification()
 
             result
                 .onSuccess { verified ->
-
                     if (verified) {
-
                         _authState.value = AuthState.Success(
                             "Correo verificado correctamente"
                         )
-
                     } else {
-
                         _authState.value = AuthState.Error(
                             "El correo todavía no ha sido verificado"
                         )
                     }
                 }
                 .onFailure { exception ->
-
                     _authState.value = AuthState.Error(
                         exception.message
                             ?: "No se pudo comprobar la verificación"
@@ -90,13 +84,14 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    // Inicio de sesión con correo y contraseña
     fun login(
         email: String,
         password: String
     ) {
         viewModelScope.launch {
-
             _authState.value = AuthState.Loading
+            _userRole.value = null
 
             val result = repository.login(
                 email = email,
@@ -104,10 +99,24 @@ class AuthViewModel : ViewModel() {
             )
 
             result
-                .onSuccess {
-                    _authState.value = AuthState.Success(
-                        "Inicio de sesión correcto"
-                    )
+                .onSuccess { user ->
+
+                    val roleResult = repository.getUserRole(user.uid)
+
+                    roleResult
+                        .onSuccess { role ->
+                            _userRole.value = role
+
+                            _authState.value = AuthState.Success(
+                                "Inicio de sesión correcto"
+                            )
+                        }
+                        .onFailure { exception ->
+                            _authState.value = AuthState.Error(
+                                exception.message
+                                    ?: "No se pudo obtener el rol del usuario"
+                            )
+                        }
                 }
                 .onFailure { exception ->
                     _authState.value = AuthState.Error(
@@ -117,22 +126,35 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    // Inicio de sesión con Google
     fun loginWithGoogle(idToken: String) {
         viewModelScope.launch {
-
             _authState.value = AuthState.Loading
+            _userRole.value = null
 
             val result = repository.signInWithGoogle(idToken)
 
             result
-                .onSuccess {
+                .onSuccess { user ->
 
-                    _authState.value = AuthState.Success(
-                        "Inicio de sesión con Google correcto"
-                    )
+                    val roleResult = repository.getUserRole(user.uid)
+
+                    roleResult
+                        .onSuccess { role ->
+                            _userRole.value = role
+
+                            _authState.value = AuthState.Success(
+                                "Inicio de sesión con Google correcto"
+                            )
+                        }
+                        .onFailure { exception ->
+                            _authState.value = AuthState.Error(
+                                exception.message
+                                    ?: "No se pudo obtener el rol del usuario"
+                            )
+                        }
                 }
                 .onFailure { exception ->
-
                     _authState.value = AuthState.Error(
                         exception.message
                             ?: "Error al iniciar sesión con Google"
@@ -141,9 +163,30 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    // Consultar rol de una sesión ya iniciada
+    fun loadCurrentUserRole() {
+        viewModelScope.launch {
+            val user = repository.getCurrentUser()
+
+            if (user == null) {
+                _userRole.value = null
+                return@launch
+            }
+
+            val result = repository.getUserRole(user.uid)
+
+            result
+                .onSuccess { role ->
+                    _userRole.value = role
+                }
+                .onFailure {
+                    _userRole.value = null
+                }
+        }
+    }
+
     fun sendEmailVerification() {
         viewModelScope.launch {
-
             _authState.value = AuthState.Loading
 
             val result = repository.sendEmailVerification()
@@ -169,7 +212,6 @@ class AuthViewModel : ViewModel() {
 
     fun sendPasswordReset(email: String) {
         viewModelScope.launch {
-
             _authState.value = AuthState.Loading
 
             val result = repository.sendPasswordReset(email)
@@ -192,6 +234,7 @@ class AuthViewModel : ViewModel() {
     fun logout() {
         repository.logout()
         _authState.value = AuthState.Idle
+        _userRole.value = null
     }
 
     fun isUserLoggedIn(): Boolean {
